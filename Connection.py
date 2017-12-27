@@ -169,41 +169,24 @@ product_shape = ifcfile.createIfcProductDefinitionShape(None, None, [axis_repres
 col = ifcfile.createIfcWallStandardCase(create_guid(), owner_history, "MB " + str(int(D_col)), "An awesome column",
                                         None, column_placement, product_shape, None)
 
-#for Fin plate {extrude in X-dir(pl_th), Z-dir horizontal(pl_w), Y-dir vertical(pl_h)}
-# Reference from column python codes
-# fin_placement = create_ifclocalplacement(ifcfile, relative_to=storey_placement)
-# polyline = create_ifcpolyline(ifcfile, [(0.0, 0.0, 0.0), (0.0, -pl_h/2, 0.0)])
-# axis_representation = ifcfile.createIfcShapeRepresentation(context, "Axis", "Curve2D", [polyline])
-#
-# extrusion_placement = create_ifcaxis2placement(ifcfile, (0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0))    #Set the local placement for finplate/
-#                                                                                                             #last two coordinates are of horz and vert. direction
-# point_list_extrusion_area = [(0.0, -pl_h/2, 0.0), (0.0, -pl_h/2, pl_w), (0.0, pl_h/2, pl_w),
-#                             (0.0, pl_h/2, 0.0), (0.0, -pl_h/2, 0.0)]
-# fplate = create_ifcextrudedareasolid(ifcfile, point_list_extrusion_area, extrusion_placement, (1.0, 0.0, 0.0), pl_th)
-# body_representation = ifcfile.createIfcShapeRepresentation(context, "Body", "SweptSolid", [fplate])
-#
-# product_shape = ifcfile.createIfcProductDefinitionShape(None, None, [axis_representation, body_representation])
-#
-# finPlate = ifcfile.createIfcWallStandardCase(create_guid(), owner_history, "Fin_plate", "An awesome plate", None, fin_placement,
-#                                         product_shape, None)
-
 #Reference from Beam python codes
 #following code will create CAD model of finPlate, draw on YZ plane, extrude in X direction
-fin_placement = create_ifclocalplacement(ifcfile, relative_to=None)
+#Some conflict with plate height and plate width in X and Y direction
+fin_placement = create_ifclocalplacement(ifcfile, relative_to = None)
 polyline = create_ifcpolyline(ifcfile, [(0.0, 0.0, 0.0), (0.0, 0.0, 0.0)])
 axis_representation = ifcfile.createIfcShapeRepresentation(context, "Axis", "Curve2D", [polyline])
 
-extrusion_placement = create_ifcaxis2placement(ifcfile, (t_beam/2+pl_th, 0.0, -gap), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0))
-point_list_extrusion_area = [(0.0, 0.0, 0.0), (0.0, 0.0, pl_w), (0.0, pl_h, pl_w),
-                             (0.0, pl_h, 0.0), (0.0, 0.0, 0.0)]
-solid = create_ifcextrudedareasolid(ifcfile, point_list_extrusion_area, extrusion_placement, (1.0, 0.0, 0.0), pl_th)
+extrusion_placement = create_ifcaxis2placement(ifcfile, (t_beam/2+pl_th, -pl_h/2, -gap), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0))
+point_list_extrusion_area = [(0.0, 0.0, 0.0), (0.0, 0.0, pl_w), (0.0, pl_th, pl_w),
+                             (0.0, pl_th, 0.0), (0.0, 0.0, 0.0)]
+solid = create_ifcextrudedareasolid(ifcfile, point_list_extrusion_area, extrusion_placement, (1.0, 0.0, 0.0), pl_h)
 body_representation = ifcfile.createIfcShapeRepresentation(context, "Body", "SweptSolid", [solid])
 
 product_shape = ifcfile.createIfcProductDefinitionShape(None, None, [axis_representation, body_representation])
 
 finPlate = ifcfile.createIfcWallStandardCase(create_guid(), owner_history, "LB " + str(int(D_beam)), "An awesome beam",
-                                         None, beam_placement,product_shape,None)
+                                         None, beam_placement,product_shape, None)
 
-
+#Code for creating Nut and Bolt
 
 ifcfile.write(filename)
