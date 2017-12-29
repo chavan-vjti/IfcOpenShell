@@ -28,6 +28,8 @@ pl_w = 90.0
 pl_h = 240.0
 pl_th = 14.0
 
+weld_th = 16.0
+
 # Creates an IfcAxis2Placement3D from Location, Axis and RefDirection specified as Python tuples
 def create_ifcaxis2placement(ifcfile, point, dir1, dir2):
     point = ifcfile.createIfcCartesianPoint(point)
@@ -142,6 +144,7 @@ point_list_extrusion_area = [(0.0, 0.0, 0.0), (B_beam, 0.0, 0.0), (B_beam, T_bea
                              (side_beam+t_beam, D_beam-T_beam, 0.0),(B_beam, D_beam-T_beam, 0.0), (B_beam, D_beam, 0.0),
                              (0.0, D_beam, 0.0), (0.0, D_beam-T_beam, 0.0), (side_beam, D_beam-T_beam,0.0), (side_beam, T_beam, 0.0),
                              (0.0, T_beam, 0.0), (0.0, 0.0, 0.0)]
+
 solid = create_ifcextrudedareasolid(ifcfile, point_list_extrusion_area, extrusion_placement, (0.0, 0.0, 1.0), length/2)
 body_representation = ifcfile.createIfcShapeRepresentation(context, "Body", "SweptSolid", [solid])
 
@@ -187,6 +190,38 @@ product_shape = ifcfile.createIfcProductDefinitionShape(None, None, [axis_repres
 finPlate = ifcfile.createIfcWallStandardCase(create_guid(), owner_history, "LB " + str(int(D_beam)), "An awesome beam",
                                          None, beam_placement,product_shape, None)
 
-#Code for creating Nut and Bolt
+#Code for creating Weld(left) Triangles
+
+wed1_placement = create_ifclocalplacement(ifcfile, relative_to = None)
+polyline = create_ifcpolyline(ifcfile, [(0.0, 0.0, 0.0), (0.0, 0.0, 0.0)])
+axis_representation = ifcfile.createIfcShapeRepresentation(context, "Axis", "Curve2D", [polyline])
+
+extrusion_placement = create_ifcaxis2placement(ifcfile, (pl_th + t_beam/2.0, pl_h/2, -gap), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0))
+point_list_extrusion_area = [(0.0, 0.0, 0.0), (weld_th, 0.0, 0.0), (0.0, 0.0, weld_th),
+                             (0.0, 0.0, 0.0)]
+solid = create_ifcextrudedareasolid(ifcfile, point_list_extrusion_area, extrusion_placement, (0.0, 1.0, 0.0), pl_h)
+body_representation = ifcfile.createIfcShapeRepresentation(context, "Body", "SweptSolid", [solid])
+
+product_shape = ifcfile.createIfcProductDefinitionShape(None, None, [axis_representation, body_representation])
+
+weld1 = ifcfile.createIfcWallStandardCase(create_guid(), owner_history, "LB " + str(int(D_beam)), "An awesome beam",
+                                         None, beam_placement,product_shape, None)
+
+#Code for creating Weld(right) Triangles
+wed2_placement = create_ifclocalplacement(ifcfile, relative_to = None)
+polyline = create_ifcpolyline(ifcfile, [(0.0, 0.0, 0.0), (0.0, 0.0, 0.0)])
+axis_representation = ifcfile.createIfcShapeRepresentation(context, "Axis", "Curve2D", [polyline])
+
+extrusion_placement = create_ifcaxis2placement(ifcfile, (t_beam/2, -pl_h/2, -gap), (-1.0, 0.0, 0.0), (0.0, 0.0, 1.0))
+point_list_extrusion_area = [(0.0, 0.0, 0.0), (weld_th, 0.0, 0.0), (0.0, 0.0, weld_th),
+                             (0.0, 0.0, 0.0)]
+solid = create_ifcextrudedareasolid(ifcfile, point_list_extrusion_area, extrusion_placement, (0.0, 1.0, 0.0), pl_h)
+body_representation = ifcfile.createIfcShapeRepresentation(context, "Body", "SweptSolid", [solid])
+
+product_shape = ifcfile.createIfcProductDefinitionShape(None, None, [axis_representation, body_representation])
+
+weld2 = ifcfile.createIfcWallStandardCase(create_guid(), owner_history, "LB " + str(int(D_beam)), "An awesome beam",
+                                         None, beam_placement,product_shape, None)
+
 
 ifcfile.write(filename)
